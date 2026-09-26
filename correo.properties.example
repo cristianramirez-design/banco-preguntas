@@ -1,0 +1,15 @@
+# Copie este archivo como correo.properties (junto al .jar) y complete los datos.
+# correo.properties esta en .gitignore: NUNCA suba la contrasena al repositorio.
+#
+# Opcion recomendada para la sustentacion: Mailtrap (https://mailtrap.io), plan gratuito,
+# "Email Testing" > Inbox > SMTP Settings. Captura todos los correos en un buzon de prueba,
+# aunque los revisores tengan direcciones ficticias.
+smtp.host=sandbox.smtp.mailtrap.io
+smtp.puerto=587
+smtp.usuario=SU_USUARIO_MAILTRAP
+smtp.contrasena=SU_CONTRASENA_MAILTRAP
+smtp.remitente=banco-preguntas@unicauca.edu.co
+smtp.starttls=true
+#
+# Alternativa Gmail: smtp.host=smtp.gmail.com, puerto 587, usuario = su correo y
+# contrasena = una "contrasena de aplicacion" (requiere verificacion en dos pasos).
