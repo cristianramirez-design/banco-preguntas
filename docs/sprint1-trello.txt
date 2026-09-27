@@ -1,0 +1,39 @@
+TABLERO TRELLO - SPRINT 1 - BANCO DE PREGUNTAS SABER PRO
+============================================================
+
+Crea tres listas con estos nombres y pega el bloque correspondiente
+en el campo 'Anadir una tarjeta'. Trello crea una tarjeta por linea.
+
+------------------------------------------------------------
+LISTA: Por hacer  (1 tarjetas)
+------------------------------------------------------------
+Video de sustentacion en YouTube (3 pts)
+
+------------------------------------------------------------
+LISTA: En progreso  (2 tarjetas)
+------------------------------------------------------------
+Documento de arquitectura y modelo C4 (5 pts)
+Prototipos de interfaz y test de usabilidad (3 pts)
+
+------------------------------------------------------------
+LISTA: Hecho  (18 tarjetas)
+------------------------------------------------------------
+[HU01] HU01 Crear pregunta de seleccion multiple con unica respuesta (8 pts)
+[HU01] Modelar entidad Pregunta con patron Builder (2 pts)
+[HU01] Implementar reglas de validacion estructural (Strategy + Composite) (3 pts)
+[HU01] Construir formulario Swing de creacion (MVC) (3 pts)
+[HU02] HU02 Cambiar estado de borrador a Pendiente de revision (5 pts)
+[HU02] Implementar patron State para el ciclo de vida de la pregunta (2 pts)
+[HU02] Renderizar los estados con colores en la tabla (1 pts)
+[HU02] Accion Enviar a revision en el controlador del listado (2 pts)
+[HU03] HU03 Listar mis preguntas con paginacion y filtros (8 pts)
+[HU03] Implementar PaginaResultado y paginacion en el servicio (3 pts)
+[HU03] Implementar filtros por texto tema estado y dificultad (3 pts)
+[HU03] Construir vista de listado con controles de paginacion (2 pts)
+[HU04] HU04 Asignar revisores y notificar por correo (8 pts)
+[HU04] Implementar AsignacionService con reglas de negocio (3 pts)
+[HU04] Implementar notificacion por correo (Observer + Adapter) (3 pts)
+[HU04] Construir vista de asignacion de revisores (2 pts)
+Configurar repositorio Git y estructura Maven (2 pts)
+Pruebas unitarias del dominio con JUnit 5 (5 pts)
+

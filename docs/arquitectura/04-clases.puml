@@ -1,0 +1,95 @@
+@startuml 04-clases
+title Diagrama de clases (C4 nivel 4 / UML) - Patrones del dominio
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty members
+
+package "State (HU-2)" {
+  class Pregunta {
+    - estado : IEstadoPregunta
+    + enviarARevision()
+    + asignarRevisores(logins)
+    + esEditable() : boolean
+  }
+  class "Pregunta.Builder" as PB <<Builder>> {
+    + contexto(..) : Builder
+    + opcionesConCorrecta(..) : Builder
+    + construir() : Pregunta
+  }
+  interface IEstadoPregunta {
+    + enviarARevision() : IEstadoPregunta
+    + asignarRevisores() : IEstadoPregunta
+    + aprobar() : IEstadoPregunta
+    + rechazar() : IEstadoPregunta
+    + getColorHex() : String
+    + esEditable() : boolean
+  }
+  class EstadoBorrador
+  class EstadoPendienteRevision
+  class EstadoEnRevision
+  class EstadoAprobada
+  class EstadoRechazada
+}
+PB ..> Pregunta : construye
+Pregunta o--> IEstadoPregunta
+IEstadoPregunta <|.. EstadoBorrador
+IEstadoPregunta <|.. EstadoPendienteRevision
+IEstadoPregunta <|.. EstadoEnRevision
+IEstadoPregunta <|.. EstadoAprobada
+IEstadoPregunta <|.. EstadoRechazada
+
+package "Strategy + Composite (HU-1)" {
+  interface IReglaValidacion {
+    + validar(p : Pregunta) : Optional<ErrorValidacion>
+  }
+  interface IValidadorPregunta {
+    + validar(p : Pregunta) : ResultadoValidacion
+  }
+  class ValidadorEstructural <<Composite>> {
+    - reglas : List<IReglaValidacion>
+    + agregar(r) : ValidadorEstructural
+    + validar(p) : ResultadoValidacion
+  }
+  class ReglaCampoObligatorio
+  class ReglaNumeroOpciones
+  class ReglaRespuestaCorrectaUnica
+  class "...otras 3 reglas" as Otras
+  class ValidadorFactory <<Factory Method>> {
+    + {static} porDefecto() : IValidadorPregunta
+  }
+}
+ValidadorEstructural o--> "*" IReglaValidacion
+IReglaValidacion <|.. ReglaCampoObligatorio
+IReglaValidacion <|.. ReglaNumeroOpciones
+IReglaValidacion <|.. ReglaRespuestaCorrectaUnica
+IReglaValidacion <|.. Otras
+ValidadorFactory ..> ValidadorEstructural : crea
+IValidadorPregunta <|.. ValidadorEstructural
+
+package "Observer + Adapter + Decorator (HU-4)" {
+  class AsignacionService {
+    - observadores : List<IObservadorAsignacion>
+    + asignarRevisores(id, logins, admin)
+    + registrarObservador(o)
+  }
+  interface IObservadorAsignacion {
+    + alAsignarRevisores(e : EventoAsignacion)
+  }
+  class NotificadorEmail
+  class NotificadorBitacora
+  interface IServicioEmail {
+    + enviar(destino, asunto, cuerpo)
+  }
+  class ServicioEmailAsincrono <<Decorator>>
+  class ServicioEmailJakartaMail <<Adapter>>
+  class ServicioEmailSmtpAdapter <<Adapter>>
+}
+AsignacionService o--> "*" IObservadorAsignacion
+IObservadorAsignacion <|.. NotificadorEmail
+IObservadorAsignacion <|.. NotificadorBitacora
+NotificadorEmail --> IServicioEmail
+IServicioEmail <|.. ServicioEmailAsincrono
+IServicioEmail <|.. ServicioEmailJakartaMail
+IServicioEmail <|.. ServicioEmailSmtpAdapter
+ServicioEmailAsincrono o--> IServicioEmail : decora
+@enduml

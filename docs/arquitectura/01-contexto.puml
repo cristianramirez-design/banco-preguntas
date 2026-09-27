@@ -1,0 +1,17 @@
+@startuml 01-contexto
+!include C4_Context.puml
+LAYOUT_WITH_LEGEND()
+title Diagrama de Contexto (C4 nivel 1) - Banco de Preguntas Saber Pro
+
+Person(autor, "Autor de preguntas", "Docente que crea preguntas de seleccion multiple y las envia a revision")
+Person(admin, "Administrador", "Coordinacion Saber Pro: asigna revisores a las preguntas pendientes")
+Person(revisor, "Revisor", "Docente que recibe por correo las preguntas que debe revisar")
+
+System(sistema, "Banco de Preguntas Saber Pro", "Aplicacion de escritorio para crear, validar, listar y gestionar el ciclo de revision de preguntas")
+System_Ext(smtp, "Servidor de correo SMTP", "Mailtrap / Gmail: entrega las notificaciones a los revisores")
+
+Rel(autor, sistema, "Crea, lista, filtra, edita y envia preguntas a revision")
+Rel(admin, sistema, "Consulta preguntas pendientes y asigna revisores")
+Rel(sistema, smtp, "Envia notificacion de asignacion", "SMTP / STARTTLS")
+Rel(smtp, revisor, "Entrega el correo")
+@enduml

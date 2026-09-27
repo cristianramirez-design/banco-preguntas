@@ -1,0 +1,47 @@
+@startuml 03-componentes
+!include C4_Component.puml
+LAYOUT_TOP_DOWN()
+title Diagrama de Componentes (C4 nivel 3) - Aplicacion de escritorio
+
+Person(usuario, "Autor / Administrador")
+ContainerDb(db, "Base de datos", "SQLite")
+System_Ext(smtp, "Servidor SMTP")
+
+Container_Boundary(app, "Aplicacion de escritorio (Java Swing)") {
+  Boundary(pres, "Capa de presentacion (presentacion)") {
+    Component(crear, "Crear pregunta", "CrearPreguntaView + Controller", "HU-1: formulario, resalta campos invalidos")
+    Component(listar, "Mis preguntas", "ListarPreguntasView + Controller + TableModel", "HU-2 y HU-3: filtros, paginacion, estados con color")
+    Component(asignar, "Asignar revisores", "AsignarRevisorView + Controller + Dialog", "HU-4: bandeja de pendientes y modal")
+  }
+  Boundary(dom, "Capa de logica de negocio (domain)") {
+    Component(psvc, "PreguntaService", "IPreguntaService", "Crear, editar, listar/paginar, enviar a revision")
+    Component(asvc, "AsignacionService", "IAsignacionService", "Asigna revisores y publica el evento (Observer)")
+    Component(valid, "ValidadorEstructural", "Strategy + Composite", "Reglas estructurales de la pregunta")
+    Component(modelo, "Modelo", "Pregunta (Builder), IEstadoPregunta (State)", "Entidades y ciclo de vida")
+    Component(notif, "NotificadorEmail", "IObservadorAsignacion", "Un correo por revisor")
+    Component(puertos, "Puertos", "IPreguntaRepository, IUsuarioRepository, IServicioEmail, IGeneradorCodigo", "Interfaces que el dominio define")
+  }
+  Boundary(acc, "Capa de acceso a datos (acceso)") {
+    Component(fab, "RepositoryFactory", "Abstract Factory", "Familias SQLite o memoria")
+    Component(repo, "Repositorios SQLite", "PreguntaRepositorySqlite, UsuarioRepositorySqlite", "JDBC")
+    Component(mail, "ServicioEmailJakartaMail", "Adapter + Decorator asincrono", "Envio SMTP en segundo plano")
+  }
+}
+
+Rel(usuario, crear, "Usa")
+Rel(usuario, listar, "Usa")
+Rel(usuario, asignar, "Usa")
+Rel(crear, psvc, "Invoca")
+Rel(listar, psvc, "Invoca")
+Rel(asignar, asvc, "Invoca")
+Rel(psvc, valid, "Valida con")
+Rel(psvc, modelo, "Opera sobre")
+Rel(asvc, notif, "Notifica a")
+Rel(psvc, puertos, "Depende de")
+Rel(asvc, puertos, "Depende de")
+Rel(repo, puertos, "Implementa")
+Rel(mail, puertos, "Implementa")
+Rel(fab, repo, "Crea")
+Rel(repo, db, "JDBC")
+Rel(mail, smtp, "SMTP")
+@enduml

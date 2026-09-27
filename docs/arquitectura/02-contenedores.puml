@@ -1,0 +1,19 @@
+@startuml 02-contenedores
+!include C4_Container.puml
+LAYOUT_WITH_LEGEND()
+title Diagrama de Contenedores (C4 nivel 2) - Banco de Preguntas Saber Pro
+
+Person(autor, "Autor de preguntas")
+Person(admin, "Administrador")
+System_Ext(smtp, "Servidor de correo SMTP", "Mailtrap / Gmail")
+
+System_Boundary(sistema, "Banco de Preguntas Saber Pro") {
+  Container(app, "Aplicacion de escritorio", "Java 17, Swing, monolito en 3 capas + MVC", "Interfaz grafica, reglas de negocio y acceso a datos en un solo proceso")
+  ContainerDb(db, "Base de datos", "SQLite (archivo banco-preguntas.db)", "Preguntas, opciones, estados, revisores asignados y usuarios")
+}
+
+Rel(autor, app, "Usa", "GUI Swing")
+Rel(admin, app, "Usa", "GUI Swing")
+Rel(app, db, "Lee y escribe", "JDBC")
+Rel(app, smtp, "Envia correos", "SMTP (Jakarta Mail)")
+@enduml
