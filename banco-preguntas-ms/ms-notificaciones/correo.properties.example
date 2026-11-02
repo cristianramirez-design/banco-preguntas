@@ -1,0 +1,8 @@
+# Copie este archivo como correo.properties (NO lo suba a Git) y ponga sus credenciales de Mailtrap.
+# Mailtrap > Email Testing > Inboxes > (su inbox) > SMTP Settings
+spring.mail.host=sandbox.smtp.mailtrap.io
+spring.mail.port=2525
+spring.mail.username=SU_USUARIO_MAILTRAP
+spring.mail.password=SU_CONTRASENA_MAILTRAP
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
