@@ -1,0 +1,75 @@
+server:
+  port: 8080
+
+ms:
+  usuarios: ${MS_USUARIOS_URL:http://localhost:8081}
+  preguntas: ${MS_PREGUNTAS_URL:http://localhost:8082}
+  revision: ${MS_REVISION_URL:http://localhost:8083}
+  notificaciones: ${MS_NOTIFICACIONES_URL:http://localhost:8084}
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:5173"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      routes:
+        - id: usuarios
+          uri: ${ms.usuarios}
+          predicates:
+            - Path=/api/usuarios/**,/api/auth/**
+        - id: preguntas
+          uri: ${ms.preguntas}
+          predicates:
+            - Path=/api/preguntas/**,/api/catalogos/**
+        - id: revision
+          uri: ${ms.revision}
+          predicates:
+            - Path=/api/revisiones/**
+        - id: notificaciones
+          uri: ${ms.notificaciones}
+          predicates:
+            - Path=/api/notificaciones/**
+        # Documentacion OpenAPI de cada microservicio, servida a traves del gateway
+        - id: docs-usuarios
+          uri: ${ms.usuarios}
+          predicates:
+            - Path=/docs/usuarios/v3/api-docs
+          filters:
+            - RewritePath=/docs/usuarios/(?<resto>.*), /$\{resto}
+        - id: docs-preguntas
+          uri: ${ms.preguntas}
+          predicates:
+            - Path=/docs/preguntas/v3/api-docs
+          filters:
+            - RewritePath=/docs/preguntas/(?<resto>.*), /$\{resto}
+        - id: docs-revision
+          uri: ${ms.revision}
+          predicates:
+            - Path=/docs/revision/v3/api-docs
+          filters:
+            - RewritePath=/docs/revision/(?<resto>.*), /$\{resto}
+        - id: docs-notificaciones
+          uri: ${ms.notificaciones}
+          predicates:
+            - Path=/docs/notificaciones/v3/api-docs
+          filters:
+            - RewritePath=/docs/notificaciones/(?<resto>.*), /$\{resto}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: ms-usuarios
+        url: /docs/usuarios/v3/api-docs
+      - name: ms-preguntas
+        url: /docs/preguntas/v3/api-docs
+      - name: ms-revision
+        url: /docs/revision/v3/api-docs
+      - name: ms-notificaciones
+        url: /docs/notificaciones/v3/api-docs
