@@ -1,0 +1,32 @@
+# Infraestructura del sistema. Uso:
+#   docker compose up -d                       -> solo RabbitMQ (los servicios usan H2 en archivo)
+#   docker compose --profile postgres up -d    -> RabbitMQ + PostgreSQL (una base por microservicio)
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: banco-rabbitmq
+    ports:
+      - "5672:5672"     # AMQP (microservicios)
+      - "15672:15672"   # Consola web: http://localhost:15672  (guest / guest)
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:16
+    container_name: banco-postgres
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_USER: banco
+      POSTGRES_PASSWORD: banco
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./infra/postgres-init.sql:/docker-entrypoint-initdb.d/01-bases.sql:ro
+      - banco-pgdata:/var/lib/postgresql/data
+
+volumes:
+  banco-pgdata:

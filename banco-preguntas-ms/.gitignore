@@ -1,0 +1,14 @@
+target/
+data/
+*.mv.db
+*.trace.db
+node_modules/
+frontend/dist/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+logs/
+*.log
+# Credenciales SMTP (Mailtrap): nunca al repositorio
+correo.properties
