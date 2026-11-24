@@ -91,7 +91,7 @@ function ModalAsignar({ pendiente, revisores, administrador, onCerrar, onListo }
   const asignar = async () => {
     setEnviando(true);
     try {
-      await api.asignar(pendiente.preguntaId, seleccion, administrador);
+      await api.asignar(pendiente.preguntaId, seleccion);
       onListo(`Se asignaron ${seleccion.length} revisor(es) a la pregunta ${pendiente.codigo}. Se enviaron los correos de aviso.`);
     } catch (e) {
       setError(e.message);

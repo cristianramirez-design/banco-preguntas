@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Arranca RabbitMQ y los 5 procesos del backend (Linux/macOS). Ctrl+C detiene todo.
+# Modo desarrollo (Linux/macOS): infraestructura en Docker y los 5 procesos con Maven. Ctrl+C detiene todo.
 set -e
 cd "$(dirname "$0")"
-docker compose up -d rabbitmq
+docker compose up -d rabbitmq postgres keycloak
 mvn -q -DskipTests install
 pids=()
 (cd ms-usuarios && mvn -q spring-boot:run) & pids+=($!)

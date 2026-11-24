@@ -1,0 +1,744 @@
+{
+  "info": {
+    "name": "Banco de Preguntas Saber Pro - Tercer corte",
+    "description": "Seguridad con Keycloak + JWT, gestion de usuarios y roles por Postman, y la API del sistema a traves del API Gateway. Ejecute primero la carpeta 1.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "gateway",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "keycloak",
+      "value": "http://localhost:8180"
+    },
+    {
+      "key": "tokenAutor",
+      "value": ""
+    },
+    {
+      "key": "tokenAdmin",
+      "value": ""
+    },
+    {
+      "key": "tokenRevisor",
+      "value": ""
+    },
+    {
+      "key": "tokenKeycloakAdmin",
+      "value": ""
+    },
+    {
+      "key": "preguntaId",
+      "value": ""
+    },
+    {
+      "key": "revisionId",
+      "value": ""
+    },
+    {
+      "key": "nuevoUsuarioId",
+      "value": ""
+    },
+    {
+      "key": "rolRevisor",
+      "value": ""
+    },
+    {
+      "key": "tokenFalso",
+      "value": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJpbnRydXNvIn0.firma-falsa"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Autenticacion (tokens JWT)",
+      "item": [
+        {
+          "name": "Token de autor1",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{keycloak}}/realms/banco-preguntas/protocol/openid-connect/token",
+            "description": "Inicia sesion como autor1 y guarda el access token JWT en la variable tokenAutor.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "client_id",
+                  "value": "banco-frontend"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "autor1"
+                },
+                {
+                  "key": "password",
+                  "value": "1234"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Keycloak entrega el token', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('tokenAutor', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Token de admin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{keycloak}}/realms/banco-preguntas/protocol/openid-connect/token",
+            "description": "Inicia sesion como admin y guarda el access token JWT en la variable tokenAdmin.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "client_id",
+                  "value": "banco-frontend"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "value": "1234"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Keycloak entrega el token', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('tokenAdmin', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Token de revisor1",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{keycloak}}/realms/banco-preguntas/protocol/openid-connect/token",
+            "description": "Inicia sesion como revisor1 y guarda el access token JWT en la variable tokenRevisor.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "client_id",
+                  "value": "banco-frontend"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "revisor1"
+                },
+                {
+                  "key": "password",
+                  "value": "1234"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Keycloak entrega el token', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('tokenRevisor', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Seguridad: el gateway rechaza peticiones no autorizadas",
+      "item": [
+        {
+          "name": "Sin token -> 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/api/preguntas",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Sin token responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Autor intenta asignar revisores -> 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gateway}}/api/revisiones/asignaciones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preguntaId\": \"x\",\n  \"revisores\": [\n    \"revisor1\"\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Un AUTOR no puede asignar: 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Token falso -> 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/api/preguntas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenFalso}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Token invalido: 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Gestion de usuarios y roles (Keycloak Admin API)",
+      "item": [
+        {
+          "name": "Token del administrador de Keycloak",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{keycloak}}/realms/master/protocol/openid-connect/token",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "client_id",
+                  "value": "admin-cli"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "value": "admin"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('tokenKeycloakAdmin', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear usuario revisor5",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{keycloak}}/admin/realms/banco-preguntas/users",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenKeycloakAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"revisor5\",\n  \"firstName\": \"Pedro\",\n  \"lastName\": \"Gaviria\",\n  \"email\": \"pedro.gaviria@unicauca.edu.co\",\n  \"enabled\": true,\n  \"emailVerified\": true,\n  \"credentials\": [\n    {\n      \"type\": \"password\",\n      \"value\": \"1234\",\n      \"temporary\": false\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Usuario creado (201)', () => pm.response.to.have.status(201));",
+                  "const loc = pm.response.headers.get('Location'); if (loc) pm.collectionVariables.set('nuevoUsuarioId', loc.split('/').pop());"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar rol REVISOR",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{keycloak}}/admin/realms/banco-preguntas/roles/REVISOR",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenKeycloakAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('rolRevisor', JSON.stringify(pm.response.json()));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Asignar rol REVISOR a revisor5",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenKeycloakAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{keycloak}}/admin/realms/banco-preguntas/users/{{nuevoUsuarioId}}/role-mappings/realm",
+            "body": {
+              "mode": "raw",
+              "raw": "[{{rolRevisor}}]"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rol asignado (204)', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar usuarios del realm",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{keycloak}}/admin/realms/banco-preguntas/users",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenKeycloakAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar el perfil en ms-usuarios (rol ADMINISTRADOR)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gateway}}/api/usuarios",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"revisor5\",\n  \"nombre\": \"Pedro Gaviria\",\n  \"email\": \"pedro.gaviria@unicauca.edu.co\",\n  \"roles\": [\n    \"REVISOR\"\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Perfil registrado (201)', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Flujo completo por el API Gateway",
+      "item": [
+        {
+          "name": "HU-1 Crear pregunta (autor1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gateway}}/api/preguntas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contexto\": \"En un curso de 5 estudiantes, las notas fueron: 3.0, 3.5, 4.0, 4.5 y 5.0.\",\n  \"enunciado\": \"¿Cuál es el promedio (media aritmética) de las notas del curso?\",\n  \"opciones\": [\n    \"3.5\",\n    \"4.0\",\n    \"4.5\",\n    \"3.8\",\n    \"4.2\"\n  ],\n  \"indiceCorrecta\": 1,\n  \"justificacion\": \"(3.0 + 3.5 + 4.0 + 4.5 + 5.0) / 5 = 20 / 5 = 4.0.\",\n  \"bibliografia\": \"Walpole, Myers y Myers (2012). Probabilidad y estadística para ingeniería y ciencias. Pearson.\",\n  \"competencia\": \"Razonamiento Cuantitativo\",\n  \"tema\": \"Estadística descriptiva\",\n  \"subtema\": \"Medidas de tendencia central\",\n  \"nivelDificultad\": \"BAJA\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('preguntaId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "HU-3 Listar mis preguntas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/api/preguntas?autor=autor1&pagina=1&tamanio=10",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "HU-2 Enviar a revision",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{gateway}}/api/preguntas/{{preguntaId}}/enviar-revision",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "HU-4 Bandeja del administrador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/api/revisiones/pendientes",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "HU-4 Asignar revisor1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gateway}}/api/revisiones/asignaciones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preguntaId\": \"{{preguntaId}}\",\n  \"revisores\": [\n    \"revisor1\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "HU-5 Mis revisiones (revisor1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/api/revisiones/mias",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRevisor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const r = pm.response.json().find(x => x.preguntaId === pm.collectionVariables.get('preguntaId')); if (r) pm.collectionVariables.set('revisionId', r.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "HU-5 Rechazar con observaciones",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gateway}}/api/revisiones/{{revisionId}}/evaluacion",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRevisor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"RECHAZAR\",\n  \"observaciones\": \"La opción D está muy cerca de la respuesta correcta.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "HU-6 Historial de revisiones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/api/revisiones/pregunta/{{preguntaId}}/historial",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "HU-6 Enviar version mejorada (version 2)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{gateway}}/api/preguntas/{{preguntaId}}/enviar-revision",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Ahora es la version 2', () => pm.expect(pm.response.json().version).to.eql(2));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Notificaciones enviadas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gateway}}/api/notificaciones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,8 @@ import { useSesion } from '../sesion.jsx';
 
 const FILTROS_VACIOS = { texto: '', estado: '', competencia: '', tema: '', nivel: '' };
 const PUEDE_ENVIAR = ['Borrador', 'Rechazada'];
+// HU-6: una pregunta rechazada se corrige y se reenvia como una version nueva
+const textoEnviar = (p) => (p.estado.nombre === 'Rechazada' ? `Enviar versión ${p.version + 1}` : 'Enviar a revisión');
 
 /** HU-3: lista con filtros y paginacion. Modo "autor" (solo las suyas) o "banco" (administrador, todas). */
 export default function ListaPreguntas({ modo = 'autor' }) {
@@ -38,7 +40,9 @@ export default function ListaPreguntas({ modo = 'autor' }) {
   const enviar = async (p) => {
     try {
       await api.enviarARevision(p.id);
-      setAviso(`La pregunta ${p.codigo} se envió a revisión. El administrador asignará los revisores.`);
+      setAviso(p.estado.nombre === 'Rechazada'
+        ? `Se envió la versión ${p.version + 1} de la pregunta ${p.codigo}. Se notificó al administrador y a los revisores anteriores.`
+        : `La pregunta ${p.codigo} se envió a revisión. El administrador asignará los revisores.`);
       setDetalle(null);
       cargar();
     } catch (e) {
@@ -121,7 +125,7 @@ export default function ListaPreguntas({ modo = 'autor' }) {
             <tbody>
               {datos.contenido.map((p) => (
                 <tr key={p.id}>
-                  <td className="codigo">{p.codigo}</td>
+                  <td className="codigo">{p.codigo}{p.version > 1 && <span className="chip-version" title="Versión mejorada (HU-6)">v{p.version}</span>}</td>
                   <td><div className="celda-enunciado">{p.enunciado}</div></td>
                   <td>{p.competencia}</td>
                   <td>{p.nivelDificultad}</td>
@@ -130,10 +134,12 @@ export default function ListaPreguntas({ modo = 'autor' }) {
                   <td><div className="acciones">
                     <button className="btn btn-claro btn-sm" onClick={() => setDetalle(p)}>Ver</button>
                     {modo === 'autor' && p.estado.editable && (
-                      <Link className="btn btn-claro btn-sm" to={`/preguntas/${p.id}/editar`}>Editar</Link>
+                      <Link className="btn btn-claro btn-sm" to={`/preguntas/${p.id}/editar`}>
+                        {p.estado.nombre === 'Rechazada' ? 'Mejorar' : 'Editar'}
+                      </Link>
                     )}
                     {modo === 'autor' && PUEDE_ENVIAR.includes(p.estado.nombre) && (
-                      <button className="btn btn-primario btn-sm" onClick={() => enviar(p)}>Enviar a revisión</button>
+                      <button className="btn btn-primario btn-sm" onClick={() => enviar(p)}>{textoEnviar(p)}</button>
                     )}
                   </div></td>
                 </tr>
@@ -157,38 +163,60 @@ export default function ListaPreguntas({ modo = 'autor' }) {
   );
 }
 
+const ETIQUETA_RESULTADO = { APROBADA: 'Aprobada', RECHAZADA: 'Rechazada', EN_CURSO: 'En revisión' };
+
+/** HU-6: detalle de la pregunta con el historial de revisiones agrupado por version. */
 function DetalleConRevisiones({ pregunta, modo, onCerrar, onEnviar }) {
-  const [revisiones, setRevisiones] = useState(null);
+  const [rondas, setRondas] = useState(null);
   useEffect(() => {
-    api.revisionesDePregunta(pregunta.id).then(setRevisiones).catch(() => setRevisiones([]));
+    api.historialRevisiones(pregunta.id).then(setRondas).catch(() => setRondas([]));
   }, [pregunta.id]);
 
   return (
-    <Modal titulo={`Pregunta ${pregunta.codigo}`} onCerrar={onCerrar} ancho={760}>
+    <Modal titulo={`Pregunta ${pregunta.codigo} · versión ${pregunta.version}`} onCerrar={onCerrar} ancho={760}>
       <DetallePregunta p={pregunta} />
-      <h4>Revisión</h4>
-      {!revisiones ? <Cargando /> : revisiones.length === 0 ? (
+      <h4>Historial de revisiones</h4>
+      {!rondas ? <Cargando /> : rondas.length === 0 ? (
         <p className="nota">Aún no tiene revisores asignados.</p>
       ) : (
-        <ul className="observaciones">
-          {revisiones.map((r) => (
-            <li key={r.id}>
-              <div className="obs-cabecera">
-                <b>{r.revisorLogin}</b>
-                <span className="nota">Ronda {r.ronda}</span>
-                <EstadoSimple valor={r.estado} />
-                <span className="nota">{fecha(r.fechaEvaluacion || r.fechaAsignacion)}</span>
+        <div className="historial">
+          {rondas.map((ronda) => (
+            <div key={ronda.version} className="ronda">
+              <div className="ronda-cabecera">
+                <strong>Versión {ronda.version}</strong>
+                <span className="nota">
+                  {ronda.evaluadas} de {ronda.totalRevisores} revisor(es) · asignada {fecha(ronda.fechaAsignacion)}
+                  {ronda.fechaCierre && ` · cerrada ${fecha(ronda.fechaCierre)}`}
+                </span>
+                <span className={`ronda-resultado ${ronda.resultado}`}>{ETIQUETA_RESULTADO[ronda.resultado] || ronda.resultado}</span>
               </div>
-              {r.observaciones ? <p>{r.observaciones}</p> : r.estado !== 'ASIGNADA' && <p className="nota">Sin observaciones.</p>}
-            </li>
+              <ul className="observaciones">
+                {ronda.revisiones.map((r) => (
+                  <li key={r.id}>
+                    <div className="obs-cabecera">
+                      <b>{r.revisorLogin}</b>
+                      <EstadoSimple valor={r.estado} />
+                      <span className="nota">{fecha(r.fechaEvaluacion || r.fechaAsignacion)}</span>
+                    </div>
+                    {r.observaciones ? <p>{r.observaciones}</p>
+                      : r.estado === 'ASIGNADA' ? <p className="nota">Pendiente de evaluar.</p>
+                        : <p className="nota">Sin observaciones.</p>}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
       {modo === 'autor' && (
         <div className="modal-acciones">
-          {pregunta.estado.editable && <Link className="btn btn-claro" to={`/preguntas/${pregunta.id}/editar`}>Editar</Link>}
+          {pregunta.estado.editable && (
+            <Link className="btn btn-claro" to={`/preguntas/${pregunta.id}/editar`}>
+              {pregunta.estado.nombre === 'Rechazada' ? 'Crear versión mejorada' : 'Editar'}
+            </Link>
+          )}
           {PUEDE_ENVIAR.includes(pregunta.estado.nombre) && (
-            <button className="btn btn-primario" onClick={() => onEnviar(pregunta)}>Enviar a revisión</button>
+            <button className="btn btn-primario" onClick={() => onEnviar(pregunta)}>{textoEnviar(pregunta)}</button>
           )}
         </div>
       )}

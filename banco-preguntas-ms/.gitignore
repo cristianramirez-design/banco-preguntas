@@ -12,3 +12,4 @@ logs/
 *.log
 # Credenciales SMTP (Mailtrap): nunca al repositorio
 correo.properties
+correo.env

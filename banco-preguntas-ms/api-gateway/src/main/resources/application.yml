@@ -10,12 +10,19 @@ ms:
 spring:
   application:
     name: api-gateway
+  # Seguridad (tercer corte): el gateway valida la firma de los tokens JWT con las llaves publicas
+  # de Keycloak. En Docker la URL es http://keycloak:8080/...; en desarrollo local, localhost:8180.
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:http://localhost:8180/realms/banco-preguntas/protocol/openid-connect/certs}
   cloud:
     gateway:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins: "http://localhost:5173"
+            allowedOrigins: "${FRONTEND_URL:http://localhost:5173}"
             allowedMethods: "*"
             allowedHeaders: "*"
       routes:

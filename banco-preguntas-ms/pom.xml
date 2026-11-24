@@ -13,10 +13,10 @@
 
     <groupId>co.edu.unicauca</groupId>
     <artifactId>banco-preguntas-ms</artifactId>
-    <version>2.0.0</version>
+    <version>3.0.0</version>
     <packaging>pom</packaging>
     <name>Banco de Preguntas Saber Pro - Microservicios</name>
-    <description>Ingenieria de Software II - Segundo corte 2026.2 - Universidad del Cauca</description>
+    <description>Ingenieria de Software II - Tercer corte 2026.2 - Universidad del Cauca</description>
 
     <modules>
         <module>api-gateway</module>

@@ -188,3 +188,24 @@ textarea { resize: vertical; }
   .dos-columnas, .rejilla-2 { grid-template-columns: 1fr; }
   .barra, .menu, .contenido { padding-left: 1rem; padding-right: 1rem; }
 }
+
+/* Login con Keycloak (tercer corte) */
+.login-angosto { max-width: 480px; }
+.login-form { display: grid; gap: .8rem; }
+.login-form .btn { width: 100%; justify-content: center; }
+.login-eleccion { text-align: center; display: grid; gap: .8rem; justify-items: center; }
+.login-prueba { margin-top: 1.2rem; }
+.login-prueba summary { cursor: pointer; color: var(--suave); font-size: .9rem; }
+.login-prueba .login-usuarios { margin-top: .6rem; }
+.login-prueba .login-usuario { background: var(--blanco); cursor: pointer; text-align: left; font: inherit; width: 100%; }
+.login-prueba .login-usuario:hover { border-color: var(--azul); }
+
+/* Historial de revisiones (HU-6) */
+.historial { display: grid; gap: .8rem; }
+.ronda { border: 1px solid var(--borde); border-radius: var(--radio); padding: .8rem 1rem; }
+.ronda-cabecera { display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; margin-bottom: .4rem; }
+.ronda-resultado { font-size: .8rem; font-weight: 700; padding: .15rem .55rem; border-radius: 999px; color: #fff; }
+.ronda-resultado.APROBADA { background: #43a047; }
+.ronda-resultado.RECHAZADA { background: #e53935; }
+.ronda-resultado.EN_CURSO { background: #1e88e5; }
+.chip-version { display: inline-block; font-size: .75rem; font-weight: 700; padding: .1rem .45rem; border-radius: 6px; background: #eef2ff; color: #3949ab; margin-left: .35rem; }

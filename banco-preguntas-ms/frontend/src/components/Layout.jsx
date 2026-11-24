@@ -19,10 +19,10 @@ const MENU = {
 };
 
 export default function Layout() {
-  const { usuario, rol, salir, cambiarRol } = useSesion();
+  const { usuario, roles, rol, salir, cambiarRol } = useSesion();
   const navegar = useNavigate();
 
-  const cambiarUsuario = () => { salir(); navegar('/login'); };
+  const cambiarUsuario = async () => { await salir(); navegar('/login'); };
   const otroRol = (r) => { cambiarRol(r); navegar(inicioDeRol(r)); };
 
   return (
@@ -40,12 +40,12 @@ export default function Layout() {
             {etiquetaRol(rol)}
           </span>
           <span className="barra-nombre">{usuario?.nombre}</span>
-          {usuario?.roles?.length > 1 && (
+          {roles.length > 1 && (
             <select aria-label="Cambiar de rol" value={rol} onChange={(e) => otroRol(e.target.value)}>
-              {usuario.roles.map((r) => <option key={r} value={r}>Trabajar como {etiquetaRol(r)}</option>)}
+              {roles.map((r) => <option key={r} value={r}>Trabajar como {etiquetaRol(r)}</option>)}
             </select>
           )}
-          <button className="btn btn-claro" onClick={cambiarUsuario}>Cambiar usuario</button>
+          <button className="btn btn-claro" onClick={cambiarUsuario}>Cerrar sesión</button>
         </div>
       </header>
       <nav className="menu">

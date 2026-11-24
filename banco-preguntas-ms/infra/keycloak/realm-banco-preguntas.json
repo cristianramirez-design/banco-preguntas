@@ -1,0 +1,187 @@
+{
+  "realm": "banco-preguntas",
+  "enabled": true,
+  "displayName": "Banco de Preguntas Saber Pro",
+  "accessTokenLifespan": 1800,
+  "ssoSessionIdleTimeout": 7200,
+  "ssoSessionMaxLifespan": 36000,
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "bruteForceProtected": true,
+  "sslRequired": "none",
+  "roles": {
+    "realm": [
+      {
+        "name": "AUTOR",
+        "description": "Docente que crea preguntas (HU-1, HU-2, HU-3, HU-6)"
+      },
+      {
+        "name": "REVISOR",
+        "description": "Docente par que evalua preguntas (HU-5)"
+      },
+      {
+        "name": "ADMINISTRADOR",
+        "description": "Coordinacion Saber Pro: asigna revisores (HU-4) y gestiona usuarios"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "banco-frontend",
+      "name": "Frontend React del Banco de Preguntas",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "+"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:5173/*"
+      },
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "username": "autor1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ana María",
+      "lastName": "Rojas",
+      "email": "ana.rojas@unicauca.edu.co",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AUTOR"
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "autor2",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Carlos Andrés",
+      "lastName": "Díaz",
+      "email": "carlos.diaz@unicauca.edu.co",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "AUTOR",
+        "REVISOR"
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "revisor1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Luisa Fernanda",
+      "lastName": "Muñoz",
+      "email": "luisa.munoz@unicauca.edu.co",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "REVISOR"
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "revisor2",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Jorge Enrique",
+      "lastName": "Vallejo",
+      "email": "jorge.vallejo@unicauca.edu.co",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "REVISOR"
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "revisor3",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Diana Patricia",
+      "lastName": "Gómez",
+      "email": "diana.gomez@unicauca.edu.co",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "REVISOR"
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "revisor4",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Mónica Patricia",
+      "lastName": "Ruiz",
+      "email": "monica.ruiz@unicauca.edu.co",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "REVISOR"
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Coordinación",
+      "lastName": "Saber Pro",
+      "email": "saberpro@unicauca.edu.co",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMINISTRADOR"
+      ],
+      "requiredActions": []
+    }
+  ]
+}

@@ -1,30 +1,32 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { cerrarSesionKeycloak, guardarSesion, leerSesion } from './api/auth.js';
 
 const SesionContexto = createContext(null);
 
 const ETIQUETAS = { AUTOR: 'Autor', REVISOR: 'Revisor', ADMINISTRADOR: 'Administrador' };
 export const etiquetaRol = (rol) => ETIQUETAS[rol] || rol;
 
-function leer() {
-  try { return JSON.parse(localStorage.getItem('sesion') || 'null'); } catch { return null; }
-}
-
+/**
+ * Sesion del usuario: tokens de Keycloak, perfil (nombre y correo de ms-usuarios), roles que vienen
+ * en el token y el rol con el que esta trabajando ahora.
+ */
 export function ProveedorSesion({ children }) {
-  const [sesion, setSesion] = useState(leer);
+  const [sesion, setSesion] = useState(leerSesion);
 
-  const guardar = (s) => {
-    try {
-      if (s) localStorage.setItem('sesion', JSON.stringify(s)); else localStorage.removeItem('sesion');
-    } catch { /* sin almacenamiento: la sesion vive solo en memoria */ }
-    setSesion(s);
-  };
+  // Si el token se renueva o vence (api/auth.js), la pantalla se entera.
+  useEffect(() => {
+    const actualizar = () => setSesion(leerSesion());
+    window.addEventListener('sesion-cambio', actualizar);
+    return () => window.removeEventListener('sesion-cambio', actualizar);
+  }, []);
 
   const valor = {
     usuario: sesion?.usuario || null,
+    roles: sesion?.roles || [],
     rol: sesion?.rol || null,
-    iniciar: (usuario, rol) => guardar({ usuario, rol }),
-    cambiarRol: (rol) => guardar({ ...sesion, rol }),
-    salir: () => guardar(null),
+    iniciar: (tokens, usuario, roles, rol) => guardarSesion({ tokens, usuario, roles, rol }),
+    cambiarRol: (rol) => guardarSesion({ ...leerSesion(), rol }),
+    salir: () => cerrarSesionKeycloak(),
   };
   return <SesionContexto.Provider value={valor}>{children}</SesionContexto.Provider>;
 }
